@@ -4,6 +4,9 @@ import requests
 import pandas as pd
 import numpy as np
 
+# API KEY — определяем СРАЗУ, до использования
+api_key = st.secrets.get("FOCUS_API_KEY", "")
+
 # ----------------------------------------------------------------------------
 # 1. НАСТРОЙКА СТРАНИЦЫ
 # ----------------------------------------------------------------------------
@@ -14,8 +17,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# API KEY — определяем СРАЗУ, до использования
-api_key = st.secrets.get("FOCUS_API_KEY", "")
+
 
 # ЦВЕТА
 BG_COLOR = "#f8f7f4"

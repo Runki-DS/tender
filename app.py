@@ -539,59 +539,55 @@ if st.session_state.analysis_result is not None:
         'Аванс': '{:,.0f}', 'Чистые активы': '{:,.0f}'
     }), use_container_width=True, hide_index=True)
 
-    def render_card(row, position_label, css_class, badge_class):
+def render_card(row, position_label, css_class, badge_class):
+        # Формируем блок рисков БЕЗ ведущих отступов
         risk_html = ""
         if row['risk_text']:
-            risk_html = f"""
-            <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid {LIGHT_GRAY};">
-                <div style="font-size: 12px; color: {GRAY}; text-transform: uppercase; margin-bottom: 6px;">Рисковые записи</div>
-                <div style="font-size: 14px; color: {DARK}; line-height: 1.5;">{'<br>'.join(row['risk_text'][:5])}</div>
-            </div>
-            """
+            risks_joined = '<br>'.join(row['risk_text'][:5])
+            risk_html = (
+                f'<div style="margin-top: 14px; padding-top: 12px; '
+                f'border-top: 1px solid {LIGHT_GRAY};">'
+                f'<div style="font-size: 12px; color: {GRAY}; '
+                f'text-transform: uppercase; margin-bottom: 6px;">Рисковые записи</div>'
+                f'<div style="font-size: 14px; color: {DARK}; line-height: 1.5;">{risks_joined}</div>'
+                f'</div>'
+            )
 
-        st.markdown(f"""
-        <div class="results-card {css_class}">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                <div>
-                    <div class="company-name">{position_label} {row['name']}</div>
-                    <div class="company-inn">ИНН {row['inn']}</div>
-                </div>
-                <div class="score-badge {badge_class}">Баллы: {row['score']}</div>
-            </div>
-            <div class="result-grid">
-                <div class="result-item">
-                    <div class="label">Ценовое предложение</div>
-                    <div class="value">{row['price']:,.0f} ₽</div>
-                </div>
-                <div class="result-item">
-                    <div class="label">Выручка (посл. период)</div>
-                    <div class="value">{row['revenue']:,.0f} ₽</div>
-                </div>
-                <div class="result-item">
-                    <div class="label">Сумма допустимого аванса</div>
-                    <div class="value">{row['max_debt']:,.0f} ₽</div>
-                </div>
-                <div class="result-item">
-                    <div class="label">Оборачиваемость</div>
-                    <div class="value">{row['cred_day']} дн.</div>
-                </div>
-                <div class="result-item">
-                    <div class="label">Чистые активы</div>
-                    <div class="value">{row['equity']:,.0f} ₽</div>
-                </div>
-                <div class="result-item">
-                    <div class="label">Скоринг (сумма) / Штат</div>
-                    <div class="value">{row['scoring_score']} / {row['employees']} чел.</div>
-                </div>
-            </div>
-            <div style="margin-top: 18px; padding-top: 14px; border-top: 1px solid {LIGHT_GRAY};">
-                <strong>Детализация баллов:</strong><br>
-                <span style="font-size: 14px; color: #4a4a4a;">{' | '.join(row['score_details']) if row['score_details'] else 'Нет начислений'}</span>
-            </div>
-            {risk_html}
-        </div>
-        """, unsafe_allow_html=True)
+        details_text = ' | '.join(row['score_details']) if row['score_details'] else 'Нет начислений'
 
+        # Собираем HTML единой строкой без переносов и отступов
+        html = (
+            f'<div class="results-card {css_class}">'
+            f'<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">'
+            f'<div>'
+            f'<div class="company-name">{position_label} {row["name"]}</div>'
+            f'<div class="company-inn">ИНН {row["inn"]}</div>'
+            f'</div>'
+            f'<div class="score-badge {badge_class}">Баллы: {row["score"]}</div>'
+            f'</div>'
+            f'<div class="result-grid">'
+            f'<div class="result-item"><div class="label">Ценовое предложение</div>'
+            f'<div class="value">{row["price"]:,.0f} ₽</div></div>'
+            f'<div class="result-item"><div class="label">Выручка (посл. период)</div>'
+            f'<div class="value">{row["revenue"]:,.0f} ₽</div></div>'
+            f'<div class="result-item"><div class="label">Сумма допустимого аванса</div>'
+            f'<div class="value">{row["max_debt"]:,.0f} ₽</div></div>'
+            f'<div class="result-item"><div class="label">Оборачиваемость</div>'
+            f'<div class="value">{row["cred_day"]} дн.</div></div>'
+            f'<div class="result-item"><div class="label">Чистые активы</div>'
+            f'<div class="value">{row["equity"]:,.0f} ₽</div></div>'
+            f'<div class="result-item"><div class="label">Скоринг (сумма) / Штат</div>'
+            f'<div class="value">{row["scoring_score"]} / {row["employees"]} чел.</div></div>'
+            f'</div>'
+            f'<div style="margin-top: 18px; padding-top: 14px; border-top: 1px solid {LIGHT_GRAY};">'
+            f'<strong>Детализация баллов:</strong><br>'
+            f'<span style="font-size: 14px; color: #4a4a4a;">{details_text}</span>'
+            f'</div>'
+            f'{risk_html}'
+            f'</div>'
+        )
+
+        st.markdown(html, unsafe_allow_html=True)
     # Лучший кандидат
     winner = df.iloc[0]
     render_card(winner, "🏆", "winner-card", "")
